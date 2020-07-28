@@ -90,12 +90,14 @@ class ChainGraph(object):
                 self.leaky_probs = torch.ones(
                     self.num_states) / self.num_states
             elif leaky_mode == "hmm":
-                self.leaky_probs = openfst_binding.StdVectorFst.set_leaky_probs(fst)
+                self.leaky_probs = simplefst.StdVectorFst.set_leaky_probs(fst)
 
             if initial_mode == "fst":
                 self.initial_probs[self.start_state] = 1.0
             else:
                 self.initial_probs.copy_(self.leaky_probs)
+            if log_domain:
+                self.initial_probs.log_()
 
             if final_mode == "one":
                 self.final_probs.fill_(1.0)
@@ -169,10 +171,16 @@ class ChainGraphBatch(object):
             self.batch_size, max_num_transitions, dtype=probs_type)
         self.leaky_probs = torch.zeros(
             self.batch_size, max_num_states, dtype=probs_type)
-        self.initial_probs = torch.zeros(
-            self.batch_size, max_num_states, dtype=probs_type)
-        self.final_probs = torch.zeros(
-            self.batch_size, max_num_states, dtype=probs_type)
+        if self.log_domain:
+            self.initial_probs = torch.full(
+                [self.batch_size, max_num_states], float("-inf"), dtype=probs_type)
+            self.final_probs = torch.full(
+                [self.batch_size, max_num_states], float("-inf"), dtype=probs_type)
+        else:
+            self.initial_probs = torch.zeros(
+                [self.batch_size, max_num_states], dtype=probs_type)
+            self.final_probs = torch.zeros(
+                [self.batch_size, max_num_states], dtype=probs_type)
         self.start_state = torch.zeros(self.batch_size, dtype=torch.long)
 
         self.index_to_pdf = None
