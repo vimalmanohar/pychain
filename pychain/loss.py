@@ -95,7 +95,7 @@ class ChainLossFunction(torch.autograd.Function):
                 if index_to_pdf is not None
                 else input.to(device='cpu'),
                 batch_sizes,
-                input_lengths,
+                input_lengths.int(),
                 num_graphs.num_states,
             )
             num_objf = num_objf.to(device=input.device)
@@ -217,7 +217,7 @@ class ChainFunction(torch.autograd.Function):
                     2,
                     index_to_pdf.unsqueeze(1).expand((-1, T, -1)),
                 )  # B x T x U
-            objf, log_probs_grad, ok = pychain_pytorch_binding.numerator_fb(
+            objf, log_probs_grad, ok = pychain_C.numerator_fb(
                 graphs.forward_transitions,
                 graphs.forward_transition_indices,
                 graphs.forward_transition_probs,

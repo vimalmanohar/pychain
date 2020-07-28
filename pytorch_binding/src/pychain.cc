@@ -18,7 +18,7 @@
 #include <torch/extension.h>
 #include <math.h>
 #include "chain-computation.h"
-#include "pychain_numerator_computation.h"
+#include "chain-numerator-computation.h"
 #include "base.h"
 
 #define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be contiguous")
